@@ -7,5 +7,5 @@
 # FILE:			makefile
 #==================================================
 
-generate: hw3_v5.cpp
-  c++11 hw3_v5.cpp -o generate
+generate: hw3.cpp
+	c++11 hw3.cpp -o generate
