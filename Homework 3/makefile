@@ -1,9 +1,10 @@
 #==================================================
-# COURSE:		CSC 460, Lab4
-# PROGRAMMER:		Noah Bumgardner (nb)
-# LAST MODIFIED DATE:	2015-08-31
-# DESCRIPTION:		This make file is for hw3_v5.cpp
-#			 and its dependencies.
+# COURSE:				CSC460, hw3
+# PROGRAMMERS:			Ali Bajwa (ab)
+#						Noah Bumgardner (nb)
+# LAST MODIFIED DATE:	2015-10-09
+# DESCRIPTION:		This make file is for hw3.cpp
+#			 	and its dependencies.
 # FILE:			makefile
 #==================================================
 

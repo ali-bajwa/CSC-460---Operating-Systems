@@ -3,10 +3,7 @@ DESCRIPTION:		This file defines pfErr(). It
                      prints an error message, beginning
 					 with proper printing format.
 ============================================================*/
-#include <iostream>
-#include <stdlib.h>
-#include <unistd.h>
-using namespace std;
+#include "pfErr.h"
 
 int pfErr(string reason="")
 {
