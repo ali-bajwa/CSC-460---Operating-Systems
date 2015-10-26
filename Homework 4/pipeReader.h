@@ -8,8 +8,10 @@ DESCRIPTION:		This file contains the prototype for the
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <iostream>
 #include <string>
+#include <stdlib.h>
 using namespace std;
 
 // Read information from a pipe
-string readPipe(char * mypipe);
+string readPipe(char* pipePath);

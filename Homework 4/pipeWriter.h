@@ -17,7 +17,7 @@ using namespace std;
 void sendInfo(string input, char* pipePath);
 
 // Create a new pipe
-void makePipe(char * mypipe);
+void makePipe(char* pipePath);
 
 // Unlink a created pipe
-void unlinkPipe(char * mypipe);
+void unlinkPipe(char* pipePath);

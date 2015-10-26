@@ -9,8 +9,10 @@
 #=====================================================
 
 generate: hw4.cpp pfErr.h pfErr.o pipeReader.h pipeReader.o pipeWriter.h pipeWriter.o
-	c++11 hw4.cpp pfErr.o -o trapezoid
-	c++11 childProcess.cpp -o childprocess
+	c++11 hw4.cpp pfErr.o pipeReader.o pipeWriter.o -o trapezoid
+	c++11 childProcess.cpp pipeReader.o pipeWriter.o -o childprocess
+	c++11 childProcess.c -o childProg
+	c++11 hw4.c -o trap
 pfErr.o: pfErr.cpp
 	c++11 -c pfErr.cpp -o pfErr.o
 pipeReader.o: pipeReader.cpp

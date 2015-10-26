@@ -79,30 +79,33 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:		(Use makefile)
 #include <vector>
 #include <string.h>
 #include <error.h>
+#include <sstream>
 #include "pfErr.h"
+#include "pipeReader.h"
+#include "pipeWriter.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
 	string errMsg = "";
-	int in_left, in_right, in_n, in_m, s;
+	int left, right, n, m, s;
 
 	// Check number of parameters.
 	if (argc != 5)
 		return pfErr();
 
 	// Assume parameters are integers.
-	in_left =	atoi(argv[1]);
-	in_right =	atoi(argv[2]);
-	in_n =		atoi(argv[3]);
-	in_m =		atoi(argv[4]);
+	left =	atoi(argv[1]);
+	right =	atoi(argv[2]);
+	n =		atoi(argv[3]);
+	m =		atoi(argv[4]);
 
 	// Check whether parameter values are valid.
-	if (in_right <= in_left)
+	if (right <= left)
 		errMsg += "\n 'left' must be less than 'right'";
-	if (in_n <= 0)
+	if (n <= 0)
 		errMsg += "\n 'n' must be positive";
-	if (in_m <= 0 or in_m > 8)
+	if (m <= 0 or m > 8)
 		errMsg += "\n 'm' must be positive and cannot exceed 8";
 
 	// If any invalid parameters, print reasons and return.
@@ -112,69 +115,90 @@ int main(int argc, char* argv[])
 		return pfErr(errMsg);
 	}
 	
-	s = min(in_n, in_m);
+	// Calculate number of slaves(s) as specified
+	s = min(n, m);
 	
-	int childPID;
-	float l, increment; // used to generate trapezoid endpoints
-	int index = 0; // keeps track of the next trapezoid to assign
-	// Vector of trapezoid endpoints
-	vector<float> trap_endpoints; 
-	// Vector to keep track of num traps calculated by slaves
-	vector<int> traps_calculated (s, 0);
-	// Vector with PIDs of each slave
-	vector<int> PIDs (s, 0);
-	vector<string> PipeNames (s+1, "");
-	bool terminate = false; // Terminate call to be sent to slaves
+	int childPID, trapsAssigned = 0, index = 0;
+	float le, increment;
+	bool terminate = false, slaveAlive = true;
+	string masterToSlave, pipeName;
+	vector<float> trap_endpoints, traps_calculated (s, 0), child_PIDs(s, 0);
+	vector<string> pipePaths;
 	
 	// Calculate the increment of x per trapezoid
-	increment = (in_right - in_left)/(float)in_n;
-	l = (float)in_left;
+	increment = (right - left)/(float)n;
+	le = (float)left;
 	
 	// Add interval information to endpoints vector
-	for (int i = 0; i <= in_n; i++ ) {
-		trap_endpoints.push_back(l);
-		l += increment;
+	for (int i = 0; i <= n; i++ ) {
+		trap_endpoints.push_back(le);
+		le += increment;
 	}
-	
-	// Initialize char array for child process args
-	int numchildargs = 3;
-	char *childargv[numchildargs];
-	for(int i = 0; i < numchildargs; i++) {
-		childargv[i] = NULL;
-	}
-	childargv[0] = new char [13];	
-	strcpy(childargv[0],"./childprocess");
-	childargv[1] = new char [5];
 	
 	/* DEBUG
-	cout << "Left: " << in_left << endl;
-	cout << "Right: " << in_right << endl;
-	cout << "n: " << in_n << endl;
-	cout << "m: " << in_m << endl;
+	cout << "Left: " << left << endl;
+	cout << "Right: " << right << endl;
+	cout << "n: " << n << endl;
+	cout << "m: " << m << endl;
 	cout << "increment: " << increment << endl;
 	cout << "S is " << s << endl;
 	for (int i = 0 ; i < trap_endpoints.size(); i++ ) {
 		cout << trap_endpoints[i] << endl;
 	}
 	cout << argv[0] << endl;
-	
 	DEBUG */
 	
+	// Initialize char array for slave process args
+	int const numChildArgs = 4;
+	char *childargv[numChildArgs];
+	
+	// Initialize childargs array to NULL
+	for(int i = 0; i < numChildArgs; i++) {
+		childargv[i] = NULL;
+	}
+	
+	// Argv[0] is binary name for slave executable
+	childargv[0] = new char [15];	
+	strcpy(childargv[0],"./childprocess");
+	
+	// Argv[1] is pipe name from Master to Slave
+	childargv[1] = new char [7];
+	
+	// Argv[2] is return pipe name from Slave to Master
+	childargv[2] = new char [10];
+	string masterPipeName = "/masterpipe";
+	strcpy(childargv[2], masterPipeName.c_str());
+	pipePaths.push_back(masterPipeName);
+	
+	makePipe(childargv[2]); // Generate global return pipe
+	
+	// Loop to spawn s processes
 	for (int i = 0; i < s; i++) {
-		// Loop to spawn s processes
-		string pipeName = "./pipe" + to_string(i+1);
-		PipeNames[i] = pipeName;
+		// Generate pipe name and assign to argv[1]
+		pipeName = "/pipe" + to_string(i+1);
 		strcpy(childargv[1], pipeName.c_str());
-		makePipe(childargv[1]);
+		makePipe(childargv[1]); // Make Master to Slave pipe
+		pipePaths.push_back(pipeName);
+		
+		//masterToSlave = to_string(trap_endpoints[i]) + " " + to_string(trap_endpoints[i+1]);
+		masterToSlave = "terminate\0";
+		string stuff("terminate");
+		
+		sendInfo(stuff, childargv[1]);
+		trapsAssigned += 1;
+		
 		childPID = fork();
 		
 		if (childPID == 0) {
 			execvp(childargv[0], childargv);
+			exit(1);
 		}
 		else if (childPID > 0) {
-			PIDs[i] = childPID;
+			child_PIDs[i] = childPID;
 		}
 		else {
+			// Needs better cleanup - send terminate signals, unlink existing pipes
+			
 			// Output failure message, terminate program.
 			cout << "ERROR:  " << "Slave" << i
 			 << " failed to generate."
@@ -182,7 +206,20 @@ int main(int argc, char* argv[])
 			exit(1); // EXIT PROGRAM, ERR
 		}
 	}
-	while (wait(&status) != pid);
+	
+	/*for (int i = 0; i < pipePaths.size(); i++) {
+				cout << pipePaths[i] << endl;
+			}*/
+	
+	/*while(slaveAlive) {
+		slaveAlive = false;
+		if (slaveAlive == false) {
+			for (int i = 0; i < pipePaths.size(); i++) {
+				unlinkPipe(pipePaths[i]);
+			}
+		}
+		break;
+	}*/
 	
 	return 0;
 }

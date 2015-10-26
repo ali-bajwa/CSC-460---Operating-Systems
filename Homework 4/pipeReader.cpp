@@ -6,13 +6,14 @@ DESCRIPTION:		This file contains code for the read
 ============================================================*/
 #include "pipeReader.h"
 
-string readPipe(char * mypipe)
+// Read information through a pipe
+string readPipe(char* pipePath)
 {
 	int const MAX_BUF = 1024;
     int fd;
     char buf[MAX_BUF];
-
-    fd = open(mypipe, O_RDONLY);
+	
+    fd = open(pipePath, O_RDONLY);
     read(fd, buf, MAX_BUF);
     close(fd);
 

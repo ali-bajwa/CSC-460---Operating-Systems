@@ -10,19 +10,18 @@ DESCRIPTION:		This file contains code for the write
 void sendInfo(string input, char* pipePath)
 {
     int fd;
-    char * mypipe = pipePath;
-
-    fd = open(mypipe, O_WRONLY);
-    write(fd, input.c_str(), input.size());
+    fd = open(pipePath, O_WRONLY);
+	cout <<"Input is: " << input << endl;
+    write(fd, input.c_str(), sizeof(char)*(input.size()));
     close(fd);
 }
 
 // Create a new pipe
-void makePipe(char * mypipe) {	
-	mkfifo(mypipe, 0666);
+void makePipe(char* pipePath) {	
+	mkfifo(pipePath, 0666);
 }
 
 // Unlink a created pipe
-void unlinkPipe(char * mypipe) {
-	unlink(mypipe);
+void unlinkPipe(char* pipePath) {
+	unlink(pipePath);
 }

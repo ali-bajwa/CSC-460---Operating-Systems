@@ -5,7 +5,7 @@ DESCRIPTION:		This file defines pfErr(). It
 ============================================================*/
 #include "pfErr.h"
 
-int pfErr(string reason="")
+int pfErr(string reason)
 {
 	/*
 	Input:	Optional string.
