@@ -43,9 +43,9 @@
 int const bufSize = 5;
 int       buffer[bufSize];         // space to store the products
 // DECLARE 3 SEMAPHORES - Ab
-// SRead -> Binary semaphore to lock buffer read/writes - Ab
-// SProduced -> Counting semaphore to prevent consumer from consuming before something is produced - Ab
-// SBuffer -> Counting semaphore to prevent producer from producing if buffer is full - Ab
+// SemRead    : Binary semaphore to lock buffer read/writes - Ab
+// SemProduced: Counting semaphore to prevent consumer from consuming before something is produced - Ab
+// SemBuffer  : Counting semaphore to prevent producer from producing if buffer is full - Ab
 sem_t SemBuffer;
 sem_t SemProduced;
 sem_t SemRead;
