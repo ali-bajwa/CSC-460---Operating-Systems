@@ -1,11 +1,11 @@
 /*=============================================================================
  PROGRAMMER:         Yang Wang
  COURSE:             CSC460: Operating System
- MODIFIED BY:        N/A
- LAST MODIFIED DATE: 10/31/2015 
+ MODIFIED BY:        Ali Bajwa (ab), Noah Bumgardner (nb)
+ LAST MODIFIED DATE: 11/13/2015
  DESCRIPTION:        This header file is used by ProducerConsumer.cpp and 
 			showBuf.cpp 
- NOTE:               N/A
+ NOTE:               Added '#include <semaphore.h>' for synchronization.
  FILE:               pc.h
 ==============================================================================*/
 #ifndef PC_H_INCLUDED
@@ -17,6 +17,7 @@ using namespace std;
 #include <unistd.h>
 #include <pthread.h>
 #include <iomanip>
+#include <semaphore.h> // ADDED - Ab
 
 #define Init     0                  // status used for output controls
 #define Producer 1

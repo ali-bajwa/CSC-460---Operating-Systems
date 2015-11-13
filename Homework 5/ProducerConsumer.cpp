@@ -2,16 +2,17 @@
  PROGRAMMER:         Yang Wang
  COURSE:             CSC460: Operating System
  MODIFIED BY:        Ali Bajwa (ab)       50% Contribution
-						- Coded semephores
-						- Analyzed syncronization problems
-						- Solved syncronization problems using 3 semephores
-						- Tested program repeatedly
-						- Wrote final documentation
+                        - Analyzed synchronization problems
+                        - Coded second draft: 3 semaphores
+                        - Tested program
+                        - Wrote partial documentation
                      Noah Bumgardner (nb) 50% Contribution
-						- Marked critical sections
-						- Wrote pseudocode for binary semephore
-						- Wrote partial documentation
-						- Submitted hardcopy
+					    - Coded first draft: pseudocode
+						- Coded third draft: create & destroy semaphores
+                        - Corrected typos
+                        - Marked critical sections
+                        - Submitted hard copy
+                        - Wrote partial documentation
  LAST MODIFIED DATE: 11/13/2015
  DESCRIPTION:        A producer thread receives the count of the products n
                      through a command-line argument and creates n products
@@ -20,14 +21,14 @@
                      threads share a bounded buffer of size bufSize.
  NOTE:               Synchronization between the two threads' operations has
                      been inserted. Comments ending with 'Ab' denote lines
-					 inserted by programmers ab and nb. Syncronization 
+					 inserted by programmers ab and nb. Synchronization 
 					 problems include:
 					 1. Consumer attempting to consume before there is a
-						product in the buffer. (Counting Semephore used)
+						product in the buffer. (Counting Semaphore used)
 					 2. Producer producing more products than the buffer
-						can handle. (Counting Semephore used)
+						can handle. (Counting Semaphore used)
 					 3. Producer and Consumer trying to add and consume
-						products simultanously. (Binary semephore used)
+						products simultaneously. (Binary Semaphore used)
 					 The critical sections of both the Producer and Consumer
 					 are clearly indicated in the code using comments.
  FILES:              ProducerConsumer.cpp, showBuf.cpp, pc.h, makefile
@@ -42,28 +43,33 @@
 int const bufSize = 5;
 int       buffer[bufSize];         // space to store the products
 // DECLARE 3 SEMAPHORES - Ab
-// SRead -> Binary semephore to lock buffer read/writes - Ab
-// SProduced -> Counting semephore to prevent consumer from consuming before something is produced - Ab
-// SBuffer -> Counting semephore to prevent producer from producing if buffer is full - Ab
-int SRead = 1, SProduced = 0, SBuffer = 5; // Ab
+// SRead -> Binary semaphore to lock buffer read/writes - Ab
+// SProduced -> Counting semaphore to prevent consumer from consuming before something is produced - Ab
+// SBuffer -> Counting semaphore to prevent producer from producing if buffer is full - Ab
+int SRead = 1, SProduced = 0, SBuffer = bufSize; // Ab
 
-void waitBinary(int& S) {     // Wait function for Binary semephore - Ab
+void waitBinary(int& S) {     // Wait function for Binary semaphore - Ab
 	while (S == 0);
 	S = 0;
 }
 
-void signalBinary(int& S) {   // Signal function for Binary semephore - Ab
+void signalBinary(int& S) {   // Signal function for Binary semaphore - Ab
 	S = 1;
 }
 
-void waitCounting(int& S) {   // Wait function for Counting semephore - Ab
+void waitCounting(int& S) {   // Wait function for Counting semaphore - Ab
 	while (S <= 0);
 	S--;
 }
 
-void signalCounting(int& S) { // Signal function for Counting semephore - Ab
+void signalCounting(int& S) { // Signal function for Counting semaphore - Ab
 	S++;
 }
+
+sem_t SemBuffer;
+sem_t SemProduced;
+sem_t SemRead;
+// DECLARATIONS END HERE - Ab
 
 //*****************************************************************************
 void* consumerThread(void* arg);
@@ -102,11 +108,47 @@ int main(int argCount, char* argList[])
 
  srand(time(NULL));              // for simulating time laps
 
+// INITIALIZE SEMAPHORES USED FOR SYNCRONIZATION - Ab
+ if (sem_init(&SemBuffer, 0, bufSize) < 0)
+ {
+  cout <<"\nError: cannot create semaphore 'SemBuffer'.\n";
+  exit(0);
+ }
+ if (sem_init(&SemProduced, 0, 0) < 0)
+ {
+  cout <<"\nError: cannot create semaphore 'SemProduced'.\n";
+  // Destroy 1 initialized semaphore
+  if (sem_destroy(&SemBuffer) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemBuffer'.\n";
+  exit(0);
+ }
+ if (sem_init(&SemRead, 0, 1) < 0)
+ {
+  cout <<"\nError: cannot create semaphore 'SemRead'.\n";
+  // Destroy 2 initialized semaphores
+  if (sem_destroy(&SemBuffer) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemBuffer'.\n";
+  if (sem_destroy(&SemRead) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemRead'.\n";
+  exit(0);
+ }
+// INITIALIZATIONS END HERE - Ab
+
 //--------------------------------------
 // 3. Create the consumer thread
 //--------------------------------------
  if (pthread_create(& threadId, NULL, consumerThread,  & productCount) != 0)
  {cout <<"\nError: cannot create the consumer thread.\n";
+ 
+  // SEMAPHORE DESTRUCTION STARTS HERE - Ab
+  // Destroy all semaphores before exiting - Ab
+  if (sem_destroy(&SemBuffer) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemBuffer'.\n";
+  if (sem_destroy(&SemProduced) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemProduced'.\n";
+  if (sem_destroy(&SemRead) < 0)
+   cout <<"\nError: cannot destroy semaphore 'SemRead'.\n";
+  // SEMAPHORE DESTRUCTION ENDS HERE - Ab
   exit(0);
  }
 
@@ -116,16 +158,16 @@ int main(int argCount, char* argList[])
  for (int i=0; i<productCount; i++)
  {sleep(rand()%4);               // simulate the time for producing a product
   aProduct = rand()%1000;        // products are integers: 0~999
-  waitCounting(SBuffer);		 // Lock Counting semephore SBuffer (prevent producing) - Ab
-  waitBinary(SRead);			 // Lock Binary semephore SRead (prevent reading) - Ab
+  waitCounting(SBuffer);		 // Lock Counting semaphore SBuffer (prevent producing) - Ab
+  waitBinary(SRead);			 // Lock Binary semaphore SRead (prevent reading) - Ab
   // CRITICAL SECTION STARTS HERE - Ab
   buffer[in] = aProduct;         // place the product into the buffer  
   in = (in+1) % bufSize;                    
   showBuffer(Producer, buffer, bufSize, in, '#');   // '#' marks the last 
                                                     // in-product position
   // CRITICAL SECTION ENDS HERE - Ab
-  signalCounting(SProduced);	 // Unlock Counting semephore SProduced (product exists) - Ab
-  signalBinary(SRead);			 // Unlock Binary semephore SRead (finished writing) - Ab
+  signalCounting(SProduced);	 // Unlock Counting semaphore SProduced (product exists) - Ab
+  signalBinary(SRead);			 // Unlock Binary semaphore SRead (finished writing) - Ab
  }
 
 //--------------------------------------
@@ -138,6 +180,15 @@ int main(int argCount, char* argList[])
 // 6. Wrap-up
 //--------------------------------------
  cout <<"\nDone.\n";
+// SEMAPHORE DESTRUCTION STARTS HERE - Ab
+// Destroy all semaphores before exiting - Ab
+ if (sem_destroy(&SemBuffer) < 0)
+  cout <<"\nError: cannot destroy semaphore 'SemBuffer'.\n";
+ if (sem_destroy(&SemProduced) < 0)
+  cout <<"\nError: cannot destroy semaphore 'SemProduced'.\n";
+ if (sem_destroy(&SemRead) < 0)
+  cout <<"\nError: cannot destroy semaphore 'SemRead'.\n";
+// SEMAPHORE DESTRUCTION ENDS HERE - Ab
  return 0;
 }
 
@@ -148,16 +199,16 @@ void* consumerThread(void* arg)
 
  for (int i=0; i<productCount; i++)
  {
-  waitCounting(SProduced);	     // Lock Counting semephore SProduced (wait for production) - Ab
-  waitBinary(SRead);			 // Lock Binary semephore SRead (prevent writing) - Ab
+  waitCounting(SProduced);	     // Lock Counting semaphore SProduced (wait for production) - Ab
+  waitBinary(SRead);			 // Lock Binary semaphore SRead (prevent writing) - Ab
   // CRITICAL SECTION STARTS HERE - Ab
   buffer[out] = -1;              // remove a product from the buffer
   out = (out + 1) % bufSize;
   showBuffer(Consumer, buffer, bufSize, out, '*');   // '*' marks the last
                                                      // out-product position
   // CRITICAL SECTION ENDS HERE - Ab
-  signalCounting(SBuffer);	     // Unlock Counting semephore SBuffer (space available) - Ab
-  signalBinary(SRead);			 // Unlock Binary semephore SRead (finished reading) - Ab
+  signalCounting(SBuffer);	     // Unlock Counting semaphore SBuffer (space available) - Ab
+  signalBinary(SRead);			 // Unlock Binary semaphore SRead (finished reading) - Ab
   sleep(rand()%4);               // simulate the time for consuming the product
  }
 
