@@ -46,26 +46,6 @@ int       buffer[bufSize];         // space to store the products
 // SRead -> Binary semaphore to lock buffer read/writes - Ab
 // SProduced -> Counting semaphore to prevent consumer from consuming before something is produced - Ab
 // SBuffer -> Counting semaphore to prevent producer from producing if buffer is full - Ab
-int SRead = 1, SProduced = 0, SBuffer = bufSize; // Ab
-
-void waitBinary(int& S) {     // Wait function for Binary semaphore - Ab
-	while (S == 0);
-	S = 0;
-}
-
-void signalBinary(int& S) {   // Signal function for Binary semaphore - Ab
-	S = 1;
-}
-
-void waitCounting(int& S) {   // Wait function for Counting semaphore - Ab
-	while (S <= 0);
-	S--;
-}
-
-void signalCounting(int& S) { // Signal function for Counting semaphore - Ab
-	S++;
-}
-
 sem_t SemBuffer;
 sem_t SemProduced;
 sem_t SemRead;
@@ -158,16 +138,16 @@ int main(int argCount, char* argList[])
  for (int i=0; i<productCount; i++)
  {sleep(rand()%4);               // simulate the time for producing a product
   aProduct = rand()%1000;        // products are integers: 0~999
-  waitCounting(SBuffer);		 // Lock Counting semaphore SBuffer (prevent producing) - Ab
-  waitBinary(SRead);			 // Lock Binary semaphore SRead (prevent reading) - Ab
+  sem_wait(SemBuffer);		     // Lock Counting semaphore SBuffer (prevent producing) - Ab
+  sem_wait(SemRead);			 // Lock Binary semaphore SRead (prevent reading) - Ab
   // CRITICAL SECTION STARTS HERE - Ab
   buffer[in] = aProduct;         // place the product into the buffer  
   in = (in+1) % bufSize;                    
   showBuffer(Producer, buffer, bufSize, in, '#');   // '#' marks the last 
                                                     // in-product position
   // CRITICAL SECTION ENDS HERE - Ab
-  signalCounting(SProduced);	 // Unlock Counting semaphore SProduced (product exists) - Ab
-  signalBinary(SRead);			 // Unlock Binary semaphore SRead (finished writing) - Ab
+  sem_post(SemProduced);	     // Unlock Counting semaphore SProduced (product exists) - Ab
+  sem_post(SemRead);			 // Unlock Binary semaphore SRead (finished writing) - Ab
  }
 
 //--------------------------------------
@@ -199,16 +179,16 @@ void* consumerThread(void* arg)
 
  for (int i=0; i<productCount; i++)
  {
-  waitCounting(SProduced);	     // Lock Counting semaphore SProduced (wait for production) - Ab
-  waitBinary(SRead);			 // Lock Binary semaphore SRead (prevent writing) - Ab
+  sem_wait(SemProduced);	     // Lock Counting semaphore SProduced (wait for production) - Ab
+  sem_wait(SemRead);			 // Lock Binary semaphore SRead (prevent writing) - Ab
   // CRITICAL SECTION STARTS HERE - Ab
   buffer[out] = -1;              // remove a product from the buffer
   out = (out + 1) % bufSize;
   showBuffer(Consumer, buffer, bufSize, out, '*');   // '*' marks the last
                                                      // out-product position
   // CRITICAL SECTION ENDS HERE - Ab
-  signalCounting(SBuffer);	     // Unlock Counting semaphore SBuffer (space available) - Ab
-  signalBinary(SRead);			 // Unlock Binary semaphore SRead (finished reading) - Ab
+  sem_post(SemBuffer);	     // Unlock Counting semaphore SBuffer (space available) - Ab
+  sem_post(SemRead);			 // Unlock Binary semaphore SRead (finished reading) - Ab
   sleep(rand()%4);               // simulate the time for consuming the product
  }
 
