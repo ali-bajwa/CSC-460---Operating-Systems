@@ -1,0 +1,10 @@
+__Past labs & homeworks to make hw6 easier.
+
+CL checking		hw3 (OR hw4, hw5)
+Documentation header	hw3
+"gitReport_hw6"		lab13
+makefile		hw4 (OR hw5)
+non-duplicated child	hw4
+pipe			hw4
+pretty printing		hw1
+write to file		_
