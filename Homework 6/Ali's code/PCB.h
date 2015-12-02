@@ -3,6 +3,8 @@ DESCRIPTION:		This file contains the source code of the
 					 PCB structure along with overloaded
 					 comparison operators.
 ============================================================*/
+#ifndef PCB_H_INCLUDED
+#define PCB_H_INCLUDED
 
 struct PCB {
 	int arrivalTime;
@@ -24,3 +26,5 @@ struct PCB {
 		return (this->CPUburst > rhs.CPUburst);
 	}
 };
+
+#endif
