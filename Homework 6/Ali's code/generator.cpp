@@ -1,16 +1,10 @@
 /*============================================================
 DESCRIPTION:		This file contains the source code of the
-					 slave process executed by the master
-					 program to calculate the area of
-					 trapezoids given function f(x)
+					 generator process.
 ============================================================*/
 #include <stdlib.h>
 #include <unistd.h>
-#include <math.h>
-#include <stdio.h>
-#include <sys/stat.h> 
 #include <string.h>
-#include <iostream>
 #include "PCB.h"
 using namespace std;
 

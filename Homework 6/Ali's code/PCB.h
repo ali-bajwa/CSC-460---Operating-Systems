@@ -1,3 +1,9 @@
+/*============================================================
+DESCRIPTION:		This file contains the source code of the
+					 PCB structure along with overloaded
+					 comparison operators.
+============================================================*/
+
 struct PCB {
 	int arrivalTime;
 	int CPUburst;
