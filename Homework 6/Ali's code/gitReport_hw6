@@ -1,0 +1,43 @@
+On branch master
+
+Initial commit
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   PCB.h
+	new file:   fileoutput.cpp
+	new file:   fileoutput.h
+	new file:   generator.cpp
+	new file:   makefile
+	new file:   scheduler.cpp
+	new file:   scheduler.h
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	../hw1/
+	../hw2/
+	../hw3/
+	../hw4/
+	../hw5/
+	generator
+	gitReport_hw6
+	record.txt
+	scheduler
+	../../lab/
+
+commit a52817ab164e2dd57fcf66b796e55ecdd63536de
+Author: ab <ali990@live.missouristate.edu>
+Date:   Wed Dec 2 12:33:20 2015 -0600
+
+    git reports on Linux
+
+ homework/hw6/PCB.h          |  30 ++++++++
+ homework/hw6/fileoutput.cpp |  27 +++++++
+ homework/hw6/fileoutput.h   |  14 ++++
+ homework/hw6/generator.cpp  |  43 ++++++++++++
+ homework/hw6/makefile       |  19 +++++
+ homework/hw6/scheduler.cpp  | 166 ++++++++++++++++++++++++++++++++++++++++++++
+ homework/hw6/scheduler.h    |  22 ++++++
+ 7 files changed, 321 insertions(+)
