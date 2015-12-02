@@ -162,12 +162,5 @@ int main(int argc, char* argv[]) {
 	
 	fileOutput(processes);
 	
-	for(int i = 0; i < processes.size(); i++) {
-		cout << processes[i].arrivalTime << " "
-			<< i+1 << " "
-			<< processes[i].CPUburst << " "
-			<< processes[i].waitingTime << endl;
-	}
-	
 	return 0;
 }
