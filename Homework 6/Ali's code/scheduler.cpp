@@ -98,15 +98,25 @@ int main(int argc, char* argv[]) {
 		if (arrivalQueue.size() != 0) {
 			// If the arrivalQueue is not empty, add all eligible processes to readyQueue
 			for (int i = 0; i < arrivalQueue.size(); i++) {
-				cout << "ArrivalQueue Size: " << arrivalQueue.size() << endl;
+				// Push valid processes to readyQueue
 				if (arrivalQueue[i].arrivalTime < timer) {
+					cout << "Pushing PCB: ArrivalTime - " << arrivalQueue[i].arrivalTime << " CPUBurst - " << arrivalQueue[i].CPUburst << endl;
 					readyQueue.push(arrivalQueue[i]);
+				}
+				else {
+					cout << "Arrival time is: " << arrivalQueue[i].arrivalTime << " Timer is: " << timer << endl;
+				}
+			}
+			for (int i = 0; i < arrivalQueue.size(); i++) {
+				// Cleanup
+				if (arrivalQueue[i].arrivalTime < timer) {
 					arrivalQueue.erase(arrivalQueue.begin() + i);
 				}
 			}
 		}
 		if (readyQueue.size() != 0) {
 			// If the readyQueue is not empty, select a process off of the queue
+			cout << readyQueue.size() << endl;
 			PCB selectProcess = readyQueue.top(); // Grab the PCB at the top of the priority queue
 			readyQueue.pop();
 			PCB runningProcess = selectProcess; // Set the current running process
@@ -114,10 +124,8 @@ int main(int argc, char* argv[]) {
 			timer += selectProcess.CPUburst; 	// Increment CPU timer and add CPU burst
 			processes.push_back(selectProcess); // Add completed process to processes vector
 		}
-		else {
-			// If the readyQueue is empty, increment CPU timer
-			timer++;
-		}
+		// If the readyQueue is empty, increment CPU timer
+		timer++;
 	}
 	
 	close(pipefd[0]); // Close the read end of the pipe
