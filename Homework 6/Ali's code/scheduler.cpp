@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 		exit(4);
 	}
 	
-	while (readyQueue.size() != 0 && arrivalQueue.size() != 0 && processesRemaining != 0) {
+	while (readyQueue.size() != 0 || arrivalQueue.size() != 0 || processesRemaining != 0) {
 		if (processesRemaining > 0) {
 			read(pipefd[0], (void*) &processControl, sizeof(processControl));
 			processesRemaining -= 1;
@@ -96,16 +96,19 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		if (readyQueue.size() != 0) {
-			PCB selectProcess = readyQueue.pop();
+			PCB selectProcess = readyQueue.top();
+			readyQueue.pop();
 			timer += selectProcess.CPUburst;
+			selectProcess.waitingTime = timer - selectProcess.arrivalTime;
 			processes.push_back(selectProcess);
 		}
+		timer++;
 	}
 	
 	sort(processes.begin(), processes.end(), compareByArrivalTime);
 	
 	for(int i = 0; i < processes.size(); i++) {
-		cout << processes[i].arrivalTime << " " << i << " " << processes[i].CPUburst << " " << processes[i].waitingTime << endl;
+		cout << processes[i].arrivalTime << " " << i+1 << " " << processes[i].CPUburst << " " << processes[i].waitingTime << endl;
 	}
 	
 	return 0;
