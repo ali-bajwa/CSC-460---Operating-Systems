@@ -6,6 +6,8 @@ PROGRAMMERS:		Ali Bajwa (ab) 			50% Contribution
 						makefile
 						PCB.h
 						scheduler.cpp
+						fileoutput.cpp
+						fileoutput.h
 
 					Noah Bumgardner (nb)	50% Contribution
 						Checked CL argument
@@ -26,7 +28,8 @@ NOTE:				If the command line integer is negative,
 					 it is replaced with zero. A negative
 					 number of processes does not make sense.
 FILES:							generator.cpp, makefile,
-								PCB.h, scheduler.cpp
+								PCB.h, scheduler.cpp, scheduler.h,
+								fileoutput.cpp, fileoutput.h
 IDE/COMPILER/INTERPRETER:		GNU g++
 INSTRUCTION FOR COMPILATION AND EXECUTION:		(Use makefile)
  1. type:  make					to COMPILE
@@ -166,6 +169,8 @@ int main(int argc, char* argv[]) {
 	
 	// Sort the processes vector by arrival times
 	sort(processes.begin(), processes.end(), compareByArrivalTime);
+	
+	fileOutput(processes);
 	
 	for(int i = 0; i < processes.size(); i++) {
 		cout << processes[i].arrivalTime << " "

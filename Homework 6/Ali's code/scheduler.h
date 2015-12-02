@@ -14,6 +14,7 @@ DESCRIPTION:		This header file is used by scheduler.cpp.
 #include <unistd.h>
 #include <vector>
 #include "PCB.h"
+#include "fileoutput.h"
 
 bool compareByArrivalTime(const PCB &a, const PCB &b) {
 	// Function to sort based on arrival times of two PCBs

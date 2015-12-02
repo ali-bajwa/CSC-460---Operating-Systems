@@ -1,0 +1,6 @@
+Arrival Time	Process	CPU burst	Waiting Time
+          33	      0	      887	           0
+          60	      1	      916	         861
+         103	      2	      336	        1735
+         139	      3	      493	        2036
+         188	      4	      422	        2481
