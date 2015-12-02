@@ -8,7 +8,7 @@
 # FILE:					makefile
 #=====================================================
 
-generate: scheduler.cpp
+generate: scheduler.cpp scheduler.h
 	c++11 scheduler.cpp -o scheduler
 	c++11 generator.cpp -o generator
 	

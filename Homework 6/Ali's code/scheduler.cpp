@@ -1,19 +1,40 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <iostream>
-#include <queue>
-#include <vector>
-#include <algorithm>
-#include "PCB.h"
+/*============================================================
+COURSE:				CSC460, hw6
+PROGRAMMERS:		Ali Bajwa (ab) 			50% Contribution
+						Documentation
+						generator.cpp
+						makefile
+						PCB.h
+						scheduler.cpp
+
+					Noah Bumgardner (nb)	50% Contribution
+						Checked CL argument
+						Documentation generator.cpp header
+						Encouraged group meetings
+						Gathered reusable code
+						Printed final copy
+						scheduler.h
+
+LAST MODIFIED DATE:	2015-12-02
+DESCRIPTION:		This program generates a non-duplicated
+				child process to generate n pairs of integers
+				representing processes.
+				...
+				The program write the results over the text
+				file 'record.txt'.
+NOTE:				If the command line integer is negative,
+					 it is replaced with zero. A negative
+					 number of processes does not make sense.
+FILES:							generator.cpp, makefile,
+								PCB.h, scheduler.cpp
+IDE/COMPILER/INTERPRETER:		GNU g++
+INSTRUCTION FOR COMPILATION AND EXECUTION:		(Use makefile)
+ 1. type:  make					to COMPILE
+ 2. type:  ./scheduler  n		to EXECUTE
+============================================================*/
+#include "scheduler.h"
 using namespace std;
 
-bool compareByArrivalTime(const PCB &a, const PCB &b) {
-	// Function to sort based on arrival times of two PCBs
-	return a.arrivalTime < b.arrivalTime;
-}
 
 int main(int argc, char* argv[]) {
 	int const MAX_SIZE = 256;
@@ -38,13 +59,25 @@ int main(int argc, char* argv[]) {
 	
 	int pipefd[2]; // Generator to Scheduler pipe
 	
+	// Check number of parameters
+	if (argc != 2) {
+		cout << "ERROR. The correct usage of this program is:"
+		 << " ./scheduler [n] (where n is non-negative)" << endl;
+		exit(1);
+	}
+
+	// Make first parameter non-negative, since it represents
+	//  the number of processes which will be made.
 	numProcesses = atoi(argv[1]);
+	if (numProcesses < 0) {
+		numProcesses = 0;
+	}
 	processesRemaining = numProcesses;
 	
 	strcpy(numProcessBuffer, to_string(numProcesses).c_str());
 	strcpy(generatorProgName, "./generator");
 	
-	// Initialize generatoargv array to NULL
+	// Initialize generatorargv array to NULL
 	for(int i = 0; i < NUM_GEN_ARGS; i++) {
 		generatorargv[i] = NULL;
 	}
@@ -131,10 +164,14 @@ int main(int argc, char* argv[]) {
 	close(pipefd[0]); // Close the read end of the pipe
 	close(pipefd[1]); // Close the write end of the pipe
 	
-	sort(processes.begin(), processes.end(), compareByArrivalTime); // Sort the processes vector by arrival times
+	// Sort the processes vector by arrival times
+	sort(processes.begin(), processes.end(), compareByArrivalTime);
 	
 	for(int i = 0; i < processes.size(); i++) {
-		cout << processes[i].arrivalTime << " " << i+1 << " " << processes[i].CPUburst << " " << processes[i].waitingTime << endl;
+		cout << processes[i].arrivalTime << " "
+			<< i+1 << " "
+			<< processes[i].CPUburst << " "
+			<< processes[i].waitingTime << endl;
 	}
 	
 	return 0;
