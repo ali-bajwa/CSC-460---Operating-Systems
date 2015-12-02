@@ -20,8 +20,9 @@ PROGRAMMERS:		Ali Bajwa (ab) 			50% Contribution
 LAST MODIFIED DATE:	2015-12-02
 DESCRIPTION:		This program generates a non-duplicated
 				child process to generate n pairs of integers
-				representing processes.
-				...
+				representing processes. It then calculates
+				the wait times based on the SJF scheduling
+				algorithm using FCFS as a tie breaker.
 				The program write the results over the text
 				file 'record.txt'.
 NOTE:				If the command line integer is negative,
@@ -104,6 +105,8 @@ int main(int argc, char* argv[]) {
 	if (generatorPID < 0){
 		// Fork error
 		printf("Fork failed");
+		close(pipefd[0]); // Close the read end of the pipe
+		close(pipefd[1]); // Close the write end of the pipe
 		exit(2);
 	}
 	else if (generatorPID == 0) {
